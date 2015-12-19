@@ -1,7 +1,7 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 22
+    compileSdkVersion 23
     buildToolsVersion "21.1.2"
 
     defaultConfig {
@@ -25,9 +25,11 @@ android {
 //            options.compilerArgs << "-Xlint:deprecation"
 //        }
 //    }
+    sourceSets { main { res.srcDirs = ['src/main/res', 'src/main/res/xml'] } }
 }
 
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
-    compile 'com.android.support:appcompat-v7:22.1.0'
+    compile 'com.android.support:appcompat-v7:23.1.1'
+    compile 'com.android.support:support-v4:23.1.1'
 }
