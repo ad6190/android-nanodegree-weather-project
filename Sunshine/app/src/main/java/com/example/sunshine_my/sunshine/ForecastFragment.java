@@ -62,7 +62,7 @@ public class ForecastFragment extends Fragment {
                              Bundle savedInstanceState) {
 
 
-   
+
         // Parameters needed by adapter
         // Context, ID of list item layout, ID of text view, list of data
 

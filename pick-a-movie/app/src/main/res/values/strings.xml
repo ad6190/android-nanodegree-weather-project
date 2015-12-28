@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">pick-a-movie</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="action_settings">Settings</string>
+    <string name="title_activity_detail">DetailActivity</string>
+    <string name="pref_sort_label">Sort By</string>
+    <string name="pref_opt1" translatable="false">Popularity</string>
+    <string name="pref_opt2" translatable="false">Rating</string>
+
+</resources>

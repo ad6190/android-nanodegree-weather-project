@@ -1,0 +1,16 @@
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <CheckBoxPreference
+        android:key="pref_opt1"
+        android:title="Popularity"
+        android:summary="option 1"
+        android:defaultValue="true"/>
+
+    <CheckBoxPreference
+        android:key="pref_opt2"
+        android:title="Rating"
+        android:summary="High Rating" />
+
+
+
+</PreferenceScreen>
