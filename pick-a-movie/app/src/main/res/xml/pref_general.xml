@@ -1,16 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <CheckBoxPreference
-        android:key="pref_opt1"
-        android:title="Popularity"
-        android:summary="option 1"
-        android:defaultValue="true"/>
-
-    <CheckBoxPreference
-        android:key="pref_opt2"
-        android:title="Rating"
-        android:summary="High Rating" />
-
-
+    <ListPreference
+        android:key="@string/pref_sort_key"
+        android:title="@string/pref_sort_label"
+        android:dialogTitle="@string/pref_sort_label"
+        android:entries="@array/pref_sort_entries"
+        android:entryValues="@array/pref_sort_values"
+        android:defaultValue="@string/pref_sort_by_popular" />
 
 </PreferenceScreen>

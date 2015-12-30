@@ -5,14 +5,18 @@ package com.example.my_movie.pick_a_movie;
  */
 
 import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.GridView;
 
 import org.json.JSONArray;
@@ -34,6 +38,8 @@ import java.util.List;
 public class GridViewFragment extends Fragment {
 
     private GridViewAdapter gridViewAdapter;
+    private GridView gv;
+    private List<MovieModel> movies;
 
     public GridViewFragment() {
     }
@@ -46,18 +52,19 @@ public class GridViewFragment extends Fragment {
 
         //Loading image from below url into gridView
         Context c = getActivity().getApplicationContext();
-        GridView gv = (GridView) rootView.findViewById(R.id.gridView);
-        gridViewAdapter = new GridViewAdapter(c);
-        gv.setAdapter(gridViewAdapter);
-//        gv.setOnItemClickListener(new AdapterView.OnItemClickListener(){
-//            @Override
-//            public void onItemClick(AdapterView<?> adapterView, View view, int position, long l){
-//                String forecast = gridViewAdapter.getItem(position);
-//                Intent intent = new Intent(getActivity(), DetailActivity.class)
-//                        .putExtra(Intent.EXTRA_TEXT, forecast);
-//                startActivity(intent);
-//            }
-//        });
+        gv = (GridView) rootView.findViewById(R.id.gridView);
+//        gridViewAdapter = new GridViewAdapter(c);
+//        gv.setAdapter(gridViewAdapter);
+        gv.setOnItemClickListener(new AdapterView.OnItemClickListener(){
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int position, long l){
+                //String movie_selected = gridViewAdapter.getItem(position);
+
+                Intent intent = new Intent(getActivity(), DetailActivity.class)
+                        .putExtra("Movie Selection", movies.get(position));
+                startActivity(intent);
+            }
+        });
 
         return rootView;
     }
@@ -65,10 +72,9 @@ public class GridViewFragment extends Fragment {
 
     private void updateMovie() {
         FetchMovieTask movieUrlTask = new FetchMovieTask();
-//        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
-//        String location = prefs.getString(getString(R.string.pref_location_key),
-//                getString(R.string.pref_location_default));
-        movieUrlTask.execute();
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
+        String sortby = prefs.getString(getString(R.string.pref_sort_key),getString(R.string.pref_sort_by_popular));
+        movieUrlTask.execute(sortby);
     }
 
     @Override
@@ -77,7 +83,7 @@ public class GridViewFragment extends Fragment {
         updateMovie();
     }
 
-    public class FetchMovieTask extends AsyncTask<Void, Void, List> {
+    public class FetchMovieTask extends AsyncTask<String, Void, List<MovieModel>> {
         /* The date/time conversion code is going to be moved outside the asynctask later,
          * so for convenience we're breaking it out into its own method now.
          */
@@ -92,36 +98,8 @@ public class GridViewFragment extends Fragment {
          * Fortunately parsing is easy:  constructor takes the JSON string and converts it
          * into an Object hierarchy for us.
          */
-        private List getMovieDataFromJson(String discoverJsonStr)
-                throws JSONException {
 
-            final String OM_LIST = "results";
-            final String OM_POSTER_PATH = "poster_path";
-            final String OM_RELEASE_DATE = "release_date";
-            final String OM_RATING = "vote_average";
-
-
-            JSONObject discoverJson = new JSONObject(discoverJsonStr);
-            JSONArray moviesArray = discoverJson.getJSONArray(OM_LIST);
-
-            List<String> resultStrs = new ArrayList<String>();
-            for(int i = 0; i < moviesArray.length(); i++) {
-
-                JSONObject movieData = moviesArray.getJSONObject(i);
-                String poster_path = movieData.getString(OM_POSTER_PATH);
-                String release_date = movieData.getString(OM_RELEASE_DATE);
-                String rating = movieData.getString(OM_RATING);
-                resultStrs.add(poster_path) ;
-            }
-
-            for (String s : resultStrs) {
-                Log.v(LOG_TAG, "Movie entry: " + s);
-            }
-            return resultStrs;
-
-        }
-
-        protected List doInBackground(Void... params) {
+        protected List<MovieModel> doInBackground(String... params) {
             // These two need to be declared outside the try/catch
             // so that they can be closed in the finally block.
             HttpURLConnection urlConnection = null;
@@ -140,7 +118,7 @@ public class GridViewFragment extends Fragment {
 
                 Uri builtUri = Uri.parse(MOVIE_POSTER_BASE_URL).buildUpon()
                         .appendQueryParameter(APPID_PARAM, BuildConfig.OPEN_MOVIE_MAP_API_KEY)
-                        .appendQueryParameter(SORT_BY, Data.SORT_BY) //get sort_by using intent from preference
+                        .appendQueryParameter(SORT_BY, params[0]) //get sort_by using intent from preference
                         .build();
 
                 URL url = new URL(builtUri.toString());
@@ -196,7 +174,8 @@ public class GridViewFragment extends Fragment {
                 }
             }
             try {
-                return getMovieDataFromJson(movieJsonStr);
+                movies = getMovieDataFromJson(movieJsonStr);
+                return movies;
             } catch (JSONException e) {
                 Log.e(LOG_TAG, e.getMessage(), e);
                 e.printStackTrace();
@@ -206,17 +185,48 @@ public class GridViewFragment extends Fragment {
         }
 
         @Override
-        protected void onPostExecute(List results) {
-//            if (results != null) {
-//            if (results != null) {
-//                gridViewAdapter.clear();
-//                for(List eachMovie : results){
-//                    gridViewAdapter.add(eachMovie);
-//                }
-//            }
+        protected void onPostExecute(List<MovieModel> results) {
+            if (results != null) {
+                Context c = getActivity().getApplicationContext();
+                gv.setAdapter(new GridViewAdapter(c, results));
+            }
 
             }
         }
+
+    private List<MovieModel> getMovieDataFromJson(String movieJsonStr) throws JSONException {
+
+        final String OM_LIST = "results";
+        final String OM_POSTER_PATH = "poster_path";
+        final String OM_RELEASE_DATE = "release_date";
+        final String OM_RATING = "vote_average";
+        final String OM_OVERVIEW = "overview";
+        final String OM_TITLE = "original_title";
+
+        List<MovieModel> movies = new ArrayList<>();
+        try {
+            JSONObject rootObj = new JSONObject(movieJsonStr);
+            JSONArray resArray = rootObj.getJSONArray(OM_LIST);
+
+            for(int i=0;i<resArray.length();i++){
+
+                JSONObject jobj = (JSONObject) resArray.get(i);
+                MovieModel movie = new MovieModel();
+                movie.thumb_link = Data.IMAGE_BASE + jobj.get(OM_POSTER_PATH).toString();
+                movie.overview = jobj.get(OM_OVERVIEW).toString();
+                movie.rating = jobj.get(OM_RATING).toString()+ "/10";
+                movie.release_date = jobj.get(OM_RELEASE_DATE).toString();
+                movie.title = jobj.get(OM_TITLE).toString();
+
+                movies.add(movie);
+            }
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        return movies;
+    }
 }
 
 

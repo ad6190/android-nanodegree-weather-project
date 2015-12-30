@@ -8,7 +8,6 @@ import android.widget.BaseAdapter;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import static android.widget.ImageView.ScaleType.CENTER_CROP;
@@ -18,20 +17,28 @@ import static android.widget.ImageView.ScaleType.CENTER_CROP;
  */
 public class GridViewAdapter extends BaseAdapter {
     private final Context context;
+    private List<MovieModel> movies;
     private final List<String> urls = new ArrayList<String>();
+    //private final List<String> new_urls = new ArrayList<String>();
 
-    public GridViewAdapter(Context context) {
+
+    public GridViewAdapter(Context context, List<MovieModel> movies) {
         this.context = context;
+        this.movies = movies;
 
-        // Ensure we get a different ordering of images on each run.
-        Collections.addAll(urls, Data.URLS);
-        Collections.shuffle(urls);
+        for (MovieModel m : movies){
+            urls.add(m.thumb_link);
+        }
+//        Collections.addAll(urls);
+//
+//        ArrayList<String> copy = new ArrayList<String>(urls);
+//        urls.addAll(copy);
 
-        // Triple up the list.
-        ArrayList<String> copy = new ArrayList<String>(urls);
-        urls.addAll(copy);
-        urls.addAll(copy);
     }
+
+
+
+
 
     @Override public View getView(int position, View convertView, ViewGroup parent) {
         SquaredImageView view = (SquaredImageView) convertView;

@@ -9,6 +9,10 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
+import android.widget.TextView;
+
+import com.squareup.picasso.Picasso;
 
 
 public class DetailActivity extends ActionBarActivity {
@@ -60,6 +64,23 @@ public class DetailActivity extends ActionBarActivity {
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                                  Bundle savedInstanceState) {
             View rootView = inflater.inflate(R.layout.fragment_detail, container, false);
+            Intent i = getActivity().getIntent();
+            MovieModel movie =  i.getParcelableExtra("Movie Selection");
+
+            TextView textView_title= (TextView)rootView.findViewById(R.id.textView_title);
+            TextView textView_overview = (TextView)rootView.findViewById(R.id.textView_overview);
+            TextView textView_rating = (TextView)rootView.findViewById(R.id.textView_rating);
+            TextView textView_date = (TextView)rootView.findViewById(R.id.textView_date);
+            ImageView imageView_thumbnail = (ImageView)rootView.findViewById(R.id.imageView_thumbnail);
+
+            textView_date.setText(movie.release_date);
+            textView_title.setText(movie.title);
+            textView_rating.setText(movie.rating);
+            textView_overview.setText(movie.overview);
+            Picasso.with(getActivity().getApplicationContext()).load(movie.thumb_link).into(imageView_thumbnail);
+
+
+
             return rootView;
         }
     }
